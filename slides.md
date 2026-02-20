@@ -195,6 +195,21 @@ Report Summary
 
 ---
 
+## Anything else?
+
+- Runs as root
+- Includes a package manager: malicious packages can be installed
+- No data on what's in the image, who built it, and where it's coming from
+
+<br>
+
+> Kubernetes and Docker security standards strongly advise running containers as non-root or rootless to limit the blast surface if the container is compromised.
+
+<br>
+<v-click>⚠️ If you don’t set the user, Docker runs as root by default!</v-click>
+
+---
+
 ## Ok, time is running out, what's the plan?
 
 Mission objective:<br><br>
@@ -213,7 +228,7 @@ Harden the base<br>
 Shrink privileges<br>
 Generate provenance<br>
 Scan<br>
-Automate<br>
+Automate updates monitoring<br>
 
 ---
 
@@ -278,7 +293,19 @@ layout: two-cols-header
 ## New Dockerfile
 
 ```dockerfile
+FROM bellsoft/hardened-liberica-runtime-container:jdk-25-glibc as builder
 
+WORKDIR /app
+ADD my-app /app/my-app
+RUN cd my-app && ./mvnw package
+
+FROM bellsoft/hardened-liberica-runtime-container:jre-25-glibc
+
+WORKDIR /app
+COPY --from=builder /app/my-app/target/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 ```
 
 ---
@@ -297,21 +324,6 @@ layout: cover
 
 ### But how do we protect the container from moles sneaking in?...
 
-
----
-
-## Step 2: Shrink privileges
-
-- Running as root
-- Excessive capabilities
-
-
-<br>
-
-> Kubernetes and Docker security standards strongly advise running containers as non-root or rootless to limit the blast surface if the container is compromised.
-
-<br>
-<v-click>⚠️ If you don’t set the user, Docker runs as root by default!</v-click>
 
 ---
 
@@ -352,7 +364,6 @@ Prevent escalation of privileges at runtime:
 ```bash
 --security-opt no-new-privileges
 ```
-
 
 ---
 
