@@ -63,7 +63,7 @@ layout: image
 image: /room.png
 ---
 
-## You’re sealed in a dark room. Water’s pouring from the ceiling. Somewhere in that water is a bomb. You’ve got 45 minutes.
+# You’re sealed in a dark room. <br>Water’s pouring from the ceiling.<br> Somewhere in that water is a bomb.<br><br> You’ve got 45 minutes.
 
 ---
 layout: image
@@ -79,7 +79,7 @@ layout: image
 image: /room.png
 ---
 
-## Ok, no panic, let's assess the situation first. <br> How bad is it? <br> <v-click>If we translate picture into code...</v-click>
+## Ok, no panic, let's assess the situation first. <br> How bad is it? <br><br> <v-click>If we translate picture into code...</v-click>
 
 ---
 
@@ -198,15 +198,22 @@ Report Summary
 ## Anything else?
 
 - Runs as root
-- Includes a package manager: malicious packages can be installed
-- No data on what's in the image, who built it, and where it's coming from
 
 <br>
 
 > Kubernetes and Docker security standards strongly advise running containers as non-root or rootless to limit the blast surface if the container is compromised.
 
 <br>
+
 <v-click>⚠️ If you don’t set the user, Docker runs as root by default!</v-click>
+
+---
+
+## Anything else?
+
+- Includes a package manager: malicious packages can be installed
+- No data on what's in the image, who built it, and where it's coming from
+- The image is updates once in a blue moon
 
 ---
 
