@@ -71,6 +71,13 @@ image: /room.png
 ---
 
 - Room = Your container image
+  - package manager,
+  - runs as root,
+  - random base,
+  - tons of packages,
+  - CVE noise,
+  - No provenance,
+  - irregular updates.
 - Water = The constant CVE flow
 - Bomb = Exploitable CVE in your context
 
@@ -192,28 +199,6 @@ Report Summary
 └────────────────────────────┴────────┴─────────────────┴─────────┘
 
 ```
-
----
-
-## Anything else?
-
-- Runs as root
-
-<br>
-
-> Kubernetes and Docker security standards strongly advise running containers as non-root or rootless to limit the blast surface if the container is compromised.
-
-<br>
-
-<v-click>⚠️ If you don’t set the user, Docker runs as root by default!</v-click>
-
----
-
-## Anything else?
-
-- Includes a package manager: malicious packages can be installed
-- No data on what's in the image, who built it, and where it's coming from
-- The image is updates once in a blue moon
 
 ---
 
