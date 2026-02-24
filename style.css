@@ -138,35 +138,95 @@ p code, li code{
 }
 
 /* --- Quotes --- */
-blockquote{
-    background-color: rgba(18, 28, 48, 0.95);
-    border-left: 8px solid var(--neon-cyan);
-    padding: 1.5rem 2rem;
-    font-style: italic;
-    color: #dde9ff;
+.slidev-layout blockquote,
+.prose blockquote,
+blockquote {
     position: relative;
-    box-shadow: 0 0 18px rgba(0,230,255,0.25), 0 10px 30px var(--shadow);
-    box-sizing: border-box;
+    margin: 1rem 0;
+    padding: 1.1rem 1.25rem 1.1rem 1.4rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 230, 255, 0.35) !important;
+    border-left: 4px solid var(--neon-cyan) !important;
+    background:
+            linear-gradient(135deg, rgba(0,230,255,0.06), rgba(111,45,189,0.08)),
+            rgba(8, 16, 30, 0.88) !important;
+    box-shadow: 0 0 18px rgba(0,230,255,0.12), 0 10px 28px var(--shadow) !important;
+    color: #dfefff !important;
+    overflow: hidden;
 }
-blockquote p{
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0 0 0 8%;
-    color: inherit;
-    font-size: inherit;
+
+/* kill default quote mark if theme adds one */
+.slidev-layout blockquote::before,
+.prose blockquote::before,
+blockquote::before {
+    content: none !important;
 }
-blockquote::before{
-    content: "“";
-    font-family: "Anta", sans-serif;
-    font-size: 5em;
-    color: rgba(0, 230, 255, 0.22);
+
+/* subtle accent line */
+.slidev-layout blockquote::after,
+.prose blockquote::after,
+blockquote::after {
+    content: "";
     position: absolute;
-    top: -0.2em;
-    left: 0.05em;
-    line-height: 1;
-    pointer-events: none;
-    z-index: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+            90deg,
+            rgba(0,230,255,0),
+            rgba(0,230,255,0.75),
+            rgba(111,45,189,0.75),
+            rgba(0,230,255,0)
+    );
+}
+
+/* force children to inherit the dark quote card background */
+.slidev-layout blockquote > *,
+.prose blockquote > *,
+blockquote > * {
+    background: transparent !important;
+    color: inherit !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* paragraphs inside quotes */
+.slidev-layout blockquote p,
+.prose blockquote p,
+blockquote p {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: inherit !important;
+    font-style: italic;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.slidev-layout blockquote p + p,
+.prose blockquote p + p,
+blockquote p + p {
+    margin-top: 0.6rem !important;
+}
+
+/* cite/source */
+.slidev-layout blockquote cite,
+.prose blockquote cite,
+blockquote cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-style: normal;
+    font-size: 0.88em;
+    color: #b8d8ff !important;
+    text-align: right;
+}
+
+.slidev-layout blockquote cite::before,
+.prose blockquote cite::before,
+blockquote cite::before {
+    content: "— ";
+    color: var(--neon-cyan);
 }
 
 /* --- Tables (if you use them) --- */

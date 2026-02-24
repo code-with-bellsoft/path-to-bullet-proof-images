@@ -223,10 +223,13 @@ Scan<br>
 Automate updates monitoring<br>
 
 ---
+layout: cover
+---
 
 ## Step 1: Pick a hardened base
 
-TODO
+### Goal: Reduce attack surface with a hardened, minimal base image.
+
 
 ---
 layout: two-cols-header
@@ -282,6 +285,17 @@ layout: two-cols-header
 
 ---
 
+## Hardened images variety: How to choose
+
+- Several vendors, including BellSoft, Chainguard, Docker
+- Look for:
+  - OS security, packaging, and compliance expertise 
+  - Signed images, standard attestations, SBOMs 
+  - SLA for patches 
+  - OS and runtime built from source in every image
+
+---
+
 ## New Dockerfile
 
 ```dockerfile
@@ -314,15 +328,22 @@ layout: cover
 
 ## Great, we cleaned up the mess
 
-### But how do we protect the container from moles sneaking in?...
+### How do we stop intruders from using what's left?
 
+---
+layout: cover
+---
+
+ ## Step 2: Shrink privileges
+
+### Goal: Reduce blast radius by dropping privileges and locking runtime behavior.
 
 ---
 
 ## Step 2: Shrink privileges
 
-🤩 Most hardened images run as non-root by default.
 
+🤩 Most hardened images run as non-root by default.<br><br>
 If not, do it manually:
 
 
@@ -358,13 +379,301 @@ Prevent escalation of privileges at runtime:
 ```
 
 ---
+layout: cover
+---
+
+## We reduced what intruders can do.
+
+### But how do we know who got into the room in the first place and what they brought with them?
+
+---
+layout: cover
+---
 
 ## Step 3: Ensure provenance
+
+### Goal: Establish trust with verifiable image provenance and build metadata.
+
+---
+
+## Step 3: Ensure provenance
+
+Provenance = verifiable supply chain evidence for:
+- Base image authenticity
+
+> Did this really come from the expected publisher?
+
+- App contents
+
+> What dependencies and artifacts are inside?
+
+- Build origin
+
+> Who and what built this image?
+
+---
+
+## Step 3: Ensure provenance
+
+Pipeline:
+
+Verify base → Build → Generate SBOM and Provenance → Attest → Store → Verify at deploy → Reuse for scans/audit
+
+---
+
+## Step 3.1: Verify the base image first
+
+If the foundation is fake, everything built on it is compromised!<br>
+
+Pin the base image by digest
+```bash
+
+```
+
+Verify signature
+```bash
+
+```
+Verify publisher attestation (origin / build claims)
+```bash
+
+```
+
+---
+
+## Step 3.2: Generate an SBOM for your app image
+
+Produce an SBOM for the application<br>
+Store it together with the base image SBOM 
+
+💡Separation of concerns: OS packages VS application dependencies
+
+> Am I affected?<br>Is this CVE in base image or app deps?<br>What changed between builds?
+
+```bash
+
+```
+
+---
+
+## Step 3.3: Generate provenance (SLSA)
+
+Lets you prove this image digest came from this source via this CI workflow
+
+Record build metadata:
+- source repo + commit
+- workflow/run ID
+- builder identity
+- build inputs / parameters
+- output image digest
+
+```bash
+
+```
+
+---
+
+## Step 3.4: Attest the image
+
+Attach SBOM and provenance as attestations to the image digest<br>
+Sign the attestations
+
+The evidence is cryptographically linked to the exact image
+
+```bash
+
+```
+
+---
+
+## Step 3.5: Store evidence where you can retrieve it fast
+
+Store attestations and SBOMs in:
+- OCI registry (attached to image)
+- and/or artifact store for indexing/search
+
+```yaml
+
+```
+
+---
+
+## Step 3.6: Verify attestation at deploy time
+
+Admission policy checks:
+- valid signature
+- expected issuer / identity
+- expected repo/workflow
+- required provenance + SBOM attestations present
+
+
+```bash
+
+```
+
+This prevents unverified images from entering production!
+
+
+---
+layout: cover
+---
+
+## We found out what’s in the room and where it came from.
+
+### How do we find a bomb if there is one?
+
+
+---
+layout: cover
+---
+
+## Step 4: Scan wisely
+
+### Goal: Prioritize exploitable risk with context-aware scanning, not CVE volume.
 
 ---
 
 ## Step 4: Scan wisely
 
+We have SBOMs + provenance = we scan what we actually built
+Scan the generated SBOMs with a vulnerability scanner (e.g. OSV-Scanner)
+
+```bash
+
+```
+
+- SBOM scan is fast and reproducible
+- Works well for rescans when new advisories appear
+- Keeps security checks tied to a specific image digest/build
+
+---
+
+## Step 4.1: Risk Classification by CVSS
+
+Use CVSS as the starting bucket:
+
+- Critical (9.0–10.0) → default to Patch now
+- High (7.0–8.9) → Patch now / next update based on exploitability + exposure
+- Medium (4.0–6.9) → usually Next update unless clearly exploitable/exposed
+- Low (0.1–3.9) → usually Exception / backlog, review in normal cycle
+
+Override based on context:
+
+- Escalate if internet-facing + reachable + high blast radius
+- De-escalate if not reachable / not used / protected by controls
+- Exception only with expiration date
+
+---
+
+## Step 4.2: Do not live on CVSS alone
+
+Use CVSS plus context:
+
+- Which component is affected?
+- Is it exploitable in this workload?
+- Does a patch exist?
+- Is it externally exposed?
+- What is the blast radius?
+- CVSS score / severity
+
+
+---
+
+## Step 4.3: Example risk model
+
+
+Inputs:
+
+Affected component (base / app dependency)
+Exploitability (reachable? runtime path? attack preconditions?)
+Patch availability (yes/no)
+External exposure (internet-facing/internal-only)
+Blast radius (single service / shared platform / lateral movement potential)
+CVSS (severity signal)
+
+Output:
+
+A risk tier you can act on quickly
+
+---
+
+## Step 4.3: Example risk model
+
+Every finding should end in one of three actions:
+
+Patch now
+
+exploitable + exposed + meaningful blast radius
+patch available
+often high CVSS, but not only because of CVSS
+
+Patch with next update
+
+lower exploitability/exposure
+patch exists
+accepted short-term risk
+
+Exception (with expiration date)
+
+no patch yet, or non-exploitable in current context
+compensating controls exist
+must have owner + expiry + review date
+
+---
+layout: cover
+---
+
+## We are safe!
+
+### ...For now. How do we KEEP the room safe?
+
+---
+layout: cover
 ---
 
 ## Step 5: Enable automated updates monitoring
+
+### Goal: Sustain security with automated base update monitoring and rebuild triggers.
+
+---
+
+## Step 5: Enable automated updates monitoring
+
+What to monitor (automatically):
+
+- Base image updates (container/Dockerfile)
+- Application dependencies (Maven/Gradle)
+- Security advisories (especially actively exploited / high-impact)
+
+
+Use Dependabot (or equivalent) to:
+- watch dependency and container updates
+- raise PRs automatically
+- trigger CI rebuild / rescan workflows
+
+```yaml
+
+```
+
+---
+
+## Safe rollout strategy
+
+When the base image updates, every dependent service should automatically:
+
+- Rebuild application image on new base
+- Regenerate SBOM + provenance
+- Sign / attest the new image
+- Rescan
+- Push by digest
+- Roll out through controlled deployment
+
+Rollout by workload criticality/exposure:
+
+- High-risk services → progressive delivery (canary / staged rollout)
+- Lower-risk services → standard rolling update
+- Any regression → automatic rollback
+
+```yaml
+
+```
