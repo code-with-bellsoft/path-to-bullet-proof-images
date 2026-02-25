@@ -535,7 +535,7 @@ layout: cover
 
 ## Step 4: Scan wisely
 
-We have SBOMs + provenance = we scan what we actually built
+We have SBOMs + provenance = we scan what we actually built<br>
 Scan the generated SBOMs with a vulnerability scanner (e.g. OSV-Scanner)
 
 ```bash
@@ -599,25 +599,18 @@ A risk tier you can act on quickly
 
 ## Step 4.3: Example risk model
 
-Every finding should end in one of three actions:
-
-Patch now
-
-exploitable + exposed + meaningful blast radius
-patch available
-often high CVSS, but not only because of CVSS
-
-Patch with next update
-
-lower exploitability/exposure
-patch exists
-accepted short-term risk
-
-Exception (with expiration date)
-
-no patch yet, or non-exploitable in current context
-compensating controls exist
-must have owner + expiry + review date
+- Patch now
+  - exploitable + exposed + meaningful blast radius
+  - patch available
+  - often high CVSS, but not only because of CVSS
+- Patch with next update
+  - lower exploitability/exposure
+  - patch exists
+  - accepted short-term risk
+- Exception (with expiration date)
+  - no patch yet, or non-exploitable in current context
+  - compensating controls exist
+  - must have owner + expiry + review date
 
 ---
 layout: cover
@@ -645,6 +638,9 @@ What to monitor (automatically):
 - Application dependencies (Maven/Gradle)
 - Security advisories (especially actively exploited / high-impact)
 
+---
+
+## Step 5: Enable automated updates monitoring
 
 Use Dependabot (or equivalent) to:
 - watch dependency and container updates
@@ -667,6 +663,10 @@ When the base image updates, every dependent service should automatically:
 - Rescan
 - Push by digest
 - Roll out through controlled deployment
+
+---
+
+## Safe rollout strategy
 
 Rollout by workload criticality/exposure:
 
