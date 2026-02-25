@@ -421,22 +421,35 @@ Verify base → Build → Generate SBOM and Provenance → Attest → Store → 
 
 ---
 
-## Step 3.1: Verify the base image first
+## Step 3.0: Pin the base image by digest
+
+...Because tags can drift
+
+```bash
+#base image version: bellsoft/hardened-liberica-runtime-container:jre-25-glibc
+FROM bellsoft/liberica-runtime-container:sha256:58f09e3e991a4588b413394cc0400b03118b492927d413c28b872e6f57cbf6fb
+```
+
+---
+
+## Step 3.1: Verify the base image
 
 If the foundation is fake, everything built on it is compromised!<br>
 
-Pin the base image by digest
-```bash
-
-```
 
 Verify signature
 ```bash
-
+$ cosign verify \
+--key cosign.pub \
+<image-uri>@sha256:<digest>
 ```
-Verify publisher attestation (origin / build claims)
-```bash
 
+Verify attestation and get the SBOM:
+```bash
+$ cosign verify-attestation \
+    --key cosign.pub \
+    --type cyclonedx \
+    $IMG_TTL | jq -r '.payload' | base64 -d | jq -r '.predicate'
 ```
 
 ---
@@ -450,68 +463,64 @@ Store it together with the base image SBOM
 
 > Am I affected?<br>Is this CVE in base image or app deps?<br>What changed between builds?
 
-```bash
+---
 
+## Step 3.2: Generate an SBOM for your app image
+
+At build time
+
+```bash
+mvn -DincludeCompileScope=true \
+  -DincludeRuntimeScope=true \
+  -DincludeTestScope=false \
+  -DincludeProvidedScope=false \
+  org.cyclonedx:cyclonedx-maven-plugin:makeBom
 ```
 
 ---
 
-## Step 3.3: Generate provenance (SLSA)
+## Step 3.2: Generate an SBOM for your app image
 
-Lets you prove this image digest came from this source via this CI workflow
+Can add a plugin
 
-Record build metadata:
-- source repo + commit
-- workflow/run ID
-- builder identity
-- build inputs / parameters
-- output image digest
+```xml
+<plugin>
+    <groupId>org.cyclonedx</groupId>
+    <artifactId>cyclonedx-maven-plugin</artifactId>
+    <version>2.9.1</version>
+    <executions>
+        <execution>
+            <id>make-app-sbom</id>
+            <phase>package</phase>
+            <goals>
+                <!-- Single-module: makeBom ; multi-module app: makeAggregateBom -->
+                <goal>makeBom</goal>
+            </goals>
+            <configuration>
+                <!-- App/runtime-focused scopes -->
+                <includeCompileScope>true</includeCompileScope>
+                <includeRuntimeScope>true</includeRuntimeScope>
+                <includeTestScope>false</includeTestScope>
+                <includeProvidedScope>false</includeProvidedScope>
+                <includeSystemScope>false</includeSystemScope>
 
-```bash
-
+                <!-- Output -->
+                <outputFormat>json</outputFormat>
+                <outputName>app-sbom</outputName>
+                <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
 ```
 
 ---
 
-## Step 3.4: Attest the image
-
-Attach SBOM and provenance as attestations to the image digest<br>
-Sign the attestations
-
-The evidence is cryptographically linked to the exact image
-
-```bash
-
-```
-
----
-
-## Step 3.5: Store evidence where you can retrieve it fast
+## Step 3.3: Store evidence where you can retrieve it fast
 
 Store attestations and SBOMs in:
 - OCI registry (attached to image)
 - and/or artifact store for indexing/search
-
-```yaml
-
-```
-
----
-
-## Step 3.6: Verify attestation at deploy time
-
-Admission policy checks:
-- valid signature
-- expected issuer / identity
-- expected repo/workflow
-- required provenance + SBOM attestations present
-
-
-```bash
-
-```
-
-This prevents unverified images from entering production!
 
 
 ---
@@ -535,12 +544,9 @@ layout: cover
 
 ## Step 4: Scan wisely
 
-We have SBOMs + provenance = we scan what we actually built<br>
-Scan the generated SBOMs with a vulnerability scanner (e.g. OSV-Scanner)
+We have SBOMs = we scan what we actually built<br>
+Scan the generated SBOMs with a vulnerability scanner
 
-```bash
-
-```
 
 - SBOM scan is fast and reproducible
 - Works well for rescans when new advisories appear
@@ -548,7 +554,22 @@ Scan the generated SBOMs with a vulnerability scanner (e.g. OSV-Scanner)
 
 ---
 
-## Step 4.1: Risk Classification by CVSS
+## Step 4.1: Scan SBOMs
+
+Scan application SBOM:
+
+```bash
+osv-scanner --sbom=target/app-sbom.json --output app-scan-results.txt
+```
+
+Scan base image SBOM:
+```bash
+osv-scanner --sbom=base-sbom.json --output base-scan-results.txt
+```
+
+---
+
+## Step 4.2: Risk Classification by CVSS
 
 Use CVSS as the starting bucket:
 
@@ -565,7 +586,7 @@ Override based on context:
 
 ---
 
-## Step 4.2: Do not live on CVSS alone
+## Step 4.3: Do not live on CVSS alone
 
 Use CVSS plus context:
 
@@ -579,16 +600,16 @@ Use CVSS plus context:
 
 ---
 
-## Step 4.3: Example risk model
+## Step 4.4: Example risk model
 
 
 Inputs:
 
-Affected component (base / app dependency)
-Exploitability (reachable? runtime path? attack preconditions?)
-Patch availability (yes/no)
-External exposure (internet-facing/internal-only)
-Blast radius (single service / shared platform / lateral movement potential)
+Affected component (base / app dependency)<br>
+Exploitability (reachable? runtime path? attack preconditions?)<br>
+Patch availability (yes/no)<br>
+External exposure (internet-facing/internal-only)<br>
+Blast radius (single service / shared platform / lateral movement potential)<br>
 CVSS (severity signal)
 
 Output:
@@ -597,7 +618,7 @@ A risk tier you can act on quickly
 
 ---
 
-## Step 4.3: Example risk model
+## Step 4.5: Example triage model
 
 - Patch now
   - exploitable + exposed + meaningful blast radius
@@ -674,6 +695,31 @@ Rollout by workload criticality/exposure:
 - Lower-risk services → standard rolling update
 - Any regression → automatic rollback
 
-```yaml
+---
+layout: cover
+---
 
-```
+## Quick summary?
+
+---
+
+## Building the foundation for vulnerability management is not that hard
+
+Four first important steps
+
+- Migrate to a hardened base: start safe
+- Generate an SBOM: become aware
+- Scan SBOMs: stay aware
+- Set up updates monitoring: stay safe
+
+
+---
+
+## Thank you for your attention!
+<br/>
+
+- BlueSky: @edelveis.dev
+- X: cat_edelveis
+- LinkedIn: cat-edelveis
+- YouTube: @cbrjar
+- bell-sw.com
