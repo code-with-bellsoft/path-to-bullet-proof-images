@@ -31,27 +31,29 @@ image: "/cat.jpg"
 ---
 
 ## BellSoft
+
 <br/>
 
 Member of:
+
 - JCP Executive Committee
 - OpenJDK Vulnerability Group
 - GraalVM Advisory Board
 - Linux Foundation
 - Cloud Native Computing Foundation
 
-
 ---
 
 ## BellSoft
+
 <br/>
 
 Products:
+
 - Liberica JDK
 - Liberica Native Image Kit
 - Alpaquita Linux
 - BellSoft Hardened Images
-
 
 ---
 layout: image
@@ -71,13 +73,13 @@ image: /room.png
 ---
 
 - Room = Your container image
-  - package manager,
-  - runs as root,
-  - random base,
-  - tons of packages,
-  - CVE noise,
-  - No provenance,
-  - irregular updates.
+    - package manager,
+    - runs as root,
+    - random base,
+    - tons of packages,
+    - CVE noise,
+    - No provenance,
+    - irregular updates.
 - Water = The constant CVE flow
 - Bomb = Exploitable CVE in your context
 
@@ -159,7 +161,7 @@ Report Summary
 ├─────────────────────────────────────────────┼────────┼─────────────────┼─────────┤
 │ neurowatch-neurowatch:latest (ubuntu 24.04) │ ubuntu │       14        │    -    │
 ├─────────────────────────────────────────────┼────────┼─────────────────┼─────────┤
-│ app/app.jar                                 │  jar   │        2        │    -    │
+│ app/app.jar                                 │  jar   │        1        │    -    │
 └─────────────────────────────────────────────┴────────┴─────────────────┴─────────┘
 
 ```
@@ -209,7 +211,6 @@ Low-noise, locked-down Java container on a hardened base with zero unmanaged ris
 
 Rules:<br><br>
 No chasing after every CVE<br>
-No leaving the room
 
 ---
 
@@ -230,12 +231,12 @@ layout: cover
 
 ### Goal: Reduce attack surface with a hardened, minimal base image.
 
-
 ---
 layout: two-cols-header
 ---
 
 ## Hardened images: new container security standard
+
 <br/>
 
 <div class="hi-grid">
@@ -289,10 +290,10 @@ layout: two-cols-header
 
 - Several vendors, including BellSoft, Chainguard, Docker
 - Look for:
-  - OS security, packaging, and compliance expertise 
-  - Signed images, standard attestations, SBOMs 
-  - SLA for patches 
-  - OS and runtime built from source in every image
+    - OS security, packaging, and compliance expertise
+    - Signed images, standard attestations, SBOMs
+    - SLA for patches
+    - OS and runtime built from source in every image
 
 ---
 
@@ -334,7 +335,7 @@ layout: cover
 layout: cover
 ---
 
- ## Step 2: Shrink privileges
+## Step 2: Shrink privileges
 
 ### Goal: Reduce blast radius by dropping privileges and locking runtime behavior.
 
@@ -342,10 +343,8 @@ layout: cover
 
 ## Step 2: Shrink privileges
 
-
 🤩 Most hardened images run as non-root by default.<br><br>
 If not, do it manually:
-
 
 ```dockerfile
 USER 1234:1234
@@ -369,11 +368,13 @@ docker run --privileged
 ```
 
 Better: limit the granted privileges only to those needed by the container:
+
 ```bash
 docker run --cap-drop all --cap-add <required-privilege>
 ```
 
 Prevent escalation of privileges at runtime:
+
 ```bash
 --security-opt no-new-privileges
 ```
@@ -399,6 +400,7 @@ layout: cover
 ## Step 3: Ensure provenance
 
 Provenance = verifiable supply chain evidence for:
+
 - Base image authenticity
 
 > Did this really come from the expected publisher?
@@ -412,12 +414,9 @@ Provenance = verifiable supply chain evidence for:
 > Who and what built this image?
 
 ---
-
-## Step 3: Ensure provenance
-
-Pipeline:
-
-Verify base → Build → Generate SBOM and Provenance → Attest → Store → Verify at deploy → Reuse for scans/audit
+layout: image
+image: /pipeline.svg
+---
 
 ---
 
@@ -436,8 +435,8 @@ FROM bellsoft/liberica-runtime-container:sha256:58f09e3e991a4588b413394cc0400b03
 
 If the foundation is fake, everything built on it is compromised!<br>
 
-
 Verify signature
+
 ```bash
 $ cosign verify \
 --key cosign.pub \
@@ -445,6 +444,7 @@ $ cosign verify \
 ```
 
 Verify attestation and get the SBOM:
+
 ```bash
 $ cosign verify-attestation \
     --key cosign.pub \
@@ -457,7 +457,7 @@ $ cosign verify-attestation \
 ## Step 3.2: Generate an SBOM for your app image
 
 Produce an SBOM for the application<br>
-Store it together with the base image SBOM 
+Store it together with the base image SBOM
 
 💡Separation of concerns: OS packages VS application dependencies
 
@@ -484,6 +484,7 @@ mvn -DincludeCompileScope=true \
 Can add a plugin
 
 ```xml
+
 <plugin>
     <groupId>org.cyclonedx</groupId>
     <artifactId>cyclonedx-maven-plugin</artifactId>
@@ -519,9 +520,9 @@ Can add a plugin
 ## Step 3.3: Store evidence where you can retrieve it fast
 
 Store attestations and SBOMs in:
+
 - OCI registry (attached to image)
 - and/or artifact store for indexing/search
-
 
 ---
 layout: cover
@@ -530,7 +531,6 @@ layout: cover
 ## We found out what’s in the room and where it came from.
 
 ### How do we find a bomb if there is one?
-
 
 ---
 layout: cover
@@ -547,7 +547,6 @@ layout: cover
 We have SBOMs = we scan what we actually built<br>
 Scan the generated SBOMs with a vulnerability scanner
 
-
 - SBOM scan is fast and reproducible
 - Works well for rescans when new advisories appear
 - Keeps security checks tied to a specific image digest/build
@@ -559,30 +558,38 @@ Scan the generated SBOMs with a vulnerability scanner
 Scan application SBOM:
 
 ```bash
-osv-scanner --sbom=target/app-sbom.json --output app-scan-results.txt
+osv-scanner -L target/app-sbom.cdx.json --output app-scan-results.json
 ```
 
 Scan base image SBOM:
+
 ```bash
-osv-scanner --sbom=base-sbom.json --output base-scan-results.txt
+osv-scanner -L target/app-sbom.cdx.json --output base-scan-results.json
 ```
 
 ---
 
-## Step 4.2: Risk Classification by CVSS
+## Scan results for our demo
 
-Use CVSS as the starting bucket:
+```bash
+Total 1 package affected by 1 known vulnerability (0 Critical, 1 High, 0 Medium, 0 Low, 0 Unknown) from 1 ecosystem.
+1 vulnerability can be fixed.
 
-- Critical (9.0–10.0) → default to Patch now
-- High (7.0–8.9) → Patch now / next update based on exploitability + exposure
-- Medium (4.0–6.9) → usually Next update unless clearly exploitable/exposed
-- Low (0.1–3.9) → usually Exception / backlog, review in normal cycle
 
-Override based on context:
++-------------------------------------+------+-----------+--------------------+---------+---------------+--------------------------+
+| OSV URL                             | CVSS | ECOSYSTEM | PACKAGE            | VERSION | FIXED VERSION | SOURCE                   |
++-------------------------------------+------+-----------+--------------------+---------+---------------+--------------------------+
+| https://osv.dev/GHSA-mjmj-j48q-9wg2 | 8.3  | Maven     | org.yaml:snakeyaml | 1.33    | 2.0           | target/app-sbom.cdx.json |
++-------------------------------------+------+-----------+--------------------+---------+---------------+--------------------------+
 
-- Escalate if internet-facing + reachable + high blast radius
-- De-escalate if not reachable / not used / protected by controls
-- Exception only with expiration date
+```
+
+<v-click>This is all very well, but what do we do with that?🧐</v-click>
+
+---
+layout: image
+image: /risk_model.svg
+---
 
 ---
 
@@ -597,41 +604,112 @@ Use CVSS plus context:
 - What is the blast radius?
 - CVSS score / severity
 
-
 ---
 
 ## Step 4.4: Example risk model
 
+<br/>
 
-Inputs:
+<table>
+  <thead>
+    <tr>
+      <th>CVE</th>
+      <th>Affected component</th>
+      <th>Exploitability</th>
+      <th>Patch availability</th>
+      <th>External exposure</th>
+      <th>Blast radius</th>
+      <th>CVSS</th>
+      <th>Triage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        CVE ID 
+      </td>
+      <td>
+        base /<br/> app dependency
+      </td>
+      <td>
+        reachable /<br/> runtime path /<br/> attack preconditions
+      </td>
+      <td>
+        yes / no
+      </td>
+      <td>
+        internet-facing /<br/> internal
+      </td>
+      <td>
+        single service /<br/> shared platform /<br/> lateral movement potential
+      </td>
+      <td>
+severity signal
+</td>
+      <td>
+patch now /<br/> with next update /<br/> exception
+</td>
+    </tr>
+  </tbody>
+</table>
 
-Affected component (base / app dependency)<br>
-Exploitability (reachable? runtime path? attack preconditions?)<br>
-Patch availability (yes/no)<br>
-External exposure (internet-facing/internal-only)<br>
-Blast radius (single service / shared platform / lateral movement potential)<br>
-CVSS (severity signal)
-
-Output:
-
+Output:<br/>
 A risk tier you can act on quickly
 
 ---
+layout: image
+image: /triage_outcomes.svg
+---
 
-## Step 4.5: Example triage model
 
-- Patch now
-  - exploitable + exposed + meaningful blast radius
-  - patch available
-  - often high CVSS, but not only because of CVSS
-- Patch with next update
-  - lower exploitability/exposure
-  - patch exists
-  - accepted short-term risk
-- Exception (with expiration date)
-  - no patch yet, or non-exploitable in current context
-  - compensating controls exist
-  - must have owner + expiry + review date
+---
+
+## Example risk classification for our demo
+
+<br/>
+
+<table>
+  <thead>
+    <tr>
+      <th>CVE</th>
+      <th>Affected component</th>
+      <th>Exploitability</th>
+      <th>Patch availability</th>
+      <th>External exposure</th>
+      <th>Blast radius</th>
+      <th>CVSS</th>
+      <th>Triage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        CVE-2022-1471 
+      </td>
+      <td>
+        App dependency (direct)
+      </td>
+      <td>
+        Reachable via admin YAML import flow;<br />
+        Potential RCE
+      </td>
+      <td>
+        Yes.<br />
+        Upgrade to snakeyaml 2.0+
+      </td>
+      <td>
+        Network
+      </td>
+      <td>
+        Single service compromise;<br />
+        Lateral movement potential
+        (secrets/DB/internal)
+      </td>
+      <td>8.3</td>
+      <td>Patch now</td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 layout: cover
@@ -664,6 +742,7 @@ What to monitor (automatically):
 ## Step 5: Enable automated updates monitoring
 
 Use Dependabot (or equivalent) to:
+
 - watch dependency and container updates
 - raise PRs automatically
 - trigger CI rebuild / rescan workflows
@@ -712,10 +791,10 @@ Four first important steps
 - Scan SBOMs: stay aware
 - Set up updates monitoring: stay safe
 
-
 ---
 
 ## Thank you for your attention!
+
 <br/>
 
 - BlueSky: @edelveis.dev
