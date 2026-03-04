@@ -90,11 +90,11 @@ image: /room.png
 
 ## Initial Dockerfile
 
-```dockerfile
+```dockerfile {none|1|4|6|8,9,10}{maxHeight:'250px'}
 FROM eclipse-temurin:25-jdk as builder
 WORKDIR /app
 COPY . /app/neurowatch
-RUN cd neurowatch && ./mvnw -Pproduction clean package
+RUN cd neurowatch && ./mvnw -Pproduction package
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
@@ -115,7 +115,7 @@ Final image: 441MB
 osv-scanner scan image neurowatch:latest
 ```
 
-```bash
+```bash {all|2|all}
 
 Total 13 packages affected by 18 known vulnerabilities (0 Critical, 4 High, 11 Medium, 3 Low, 0 Unknown) from 1 ecosystem.
 ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -306,12 +306,12 @@ layout: two-cols-header
 
 ## New Dockerfile
 
-```dockerfile
+```dockerfile {none|1,7}
 FROM bellsoft/hardened-liberica-runtime-container:jdk-25-glibc as builder
 
 WORKDIR /app
 ADD my-app /app/my-app
-RUN cd my-app && ./mvnw package
+RUN cd my-app && ./mvnw -Pproduction package
 
 FROM bellsoft/hardened-liberica-runtime-container:jre-25-glibc
 
@@ -326,7 +326,7 @@ ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 ### Let's scan it to make sure we are on the right way
 
-```bash
+```bash {all|7}
 osv-scanner scan image bellsoft/hardened-liberica-runtime-container:jre-25-glibc
 
 Scanning image "bellsoft/hardened-liberica-runtime-container:jre-25-glibc"
@@ -336,7 +336,7 @@ End status: 150 dirs visited, 854 inodes visited, 202 Extract calls, 9.993542ms 
 No issues found
 ```
 
-<v-click>Zero CVEs!</v-click>
+<v-click at="1">Zero CVEs!</v-click>
 
 
 ---
@@ -499,8 +499,7 @@ mvn -DincludeCompileScope=true \
 
 Can add a plugin
 
-```xml
-
+```xml {none|1-3|8,11|15-19|22-24}{maxHeight:'250px'}
 <plugin>
     <groupId>org.cyclonedx</groupId>
     <artifactId>cyclonedx-maven-plugin</artifactId>
@@ -766,7 +765,7 @@ Use Renovate (or equivalent) to:
 
 ## Example: setting up base updates monitoring with Renovate
 
-```json
+```json {all|7|15,16}
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
