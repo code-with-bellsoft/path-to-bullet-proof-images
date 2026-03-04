@@ -56,9 +56,11 @@ Products:
 - BellSoft Hardened Images
 
 ---
-layout: image
-image: /room.png
----
+
+<SlidevVideo v-click autoplay controls>
+  <source src="/room_video.mp4" type="video/mp4" />
+  <autoplay>true</autoplay>
+</SlidevVideo>
 
 ---
 layout: image
@@ -73,13 +75,6 @@ image: /room.png
 ---
 
 - Room = Your container image
-    - package manager,
-    - runs as root,
-    - random base,
-    - tons of packages,
-    - CVE noise,
-    - No provenance,
-    - irregular updates.
 - Water = The constant CVE flow
 - Bomb = Exploitable CVE in your context
 
@@ -88,7 +83,8 @@ layout: image
 image: /room.png
 ---
 
-## Ok, no panic, let's assess the situation first. <br> How bad is it? <br><br> <v-click>If we translate picture into code...</v-click>
+## Let's assess the situation first. <br> How bad is it? <br><br> <v-click>If we translate picture into code...</v-click>
+
 
 ---
 
@@ -204,7 +200,19 @@ Report Summary
 
 ---
 
-## Ok, time is running out, what's the plan?
+## Apart from that...
+
+- package manager,
+- runs as root,
+- random base,
+- tons of packages,
+- CVE noise,
+- No provenance,
+- irregular updates.
+
+---
+
+## Time is running out, what's the plan?
 
 Mission objective:<br><br>
 Low-noise, locked-down Java container on a hardened base with zero unmanaged risk
@@ -221,7 +229,6 @@ Harden the base<br>
 Shrink privileges<br>
 Generate provenance<br>
 Scan<br>
-Automate updates monitoring<br>
 
 ---
 layout: cover
@@ -320,8 +327,17 @@ ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 ### Let's scan it to make sure we are on the right way
 
 ```bash
+osv-scanner scan image bellsoft/hardened-liberica-runtime-container:jre-25-glibc
 
+Scanning image "bellsoft/hardened-liberica-runtime-container:jre-25-glibc"
+Starting filesystem walk for root: 
+End status: 150 dirs visited, 854 inodes visited, 202 Extract calls, 9.993542ms elapsed, 9.993ms wall time
+
+No issues found
 ```
+
+<v-click>Zero CVEs!</v-click>
+
 
 ---
 layout: cover
@@ -385,7 +401,7 @@ layout: cover
 
 ## We reduced what intruders can do.
 
-### But how do we know who got into the room in the first place and what they brought with them?
+### But how do we know what got into the room in the first place?
 
 ---
 layout: cover
@@ -393,7 +409,7 @@ layout: cover
 
 ## Step 3: Ensure provenance
 
-### Goal: Establish trust with verifiable image provenance and build metadata.
+### Goal: Establish trust with verifiable image provenance.
 
 ---
 
@@ -545,7 +561,6 @@ layout: cover
 ## Step 4: Scan wisely
 
 We have SBOMs = we scan what we actually built<br>
-Scan the generated SBOMs with a vulnerability scanner
 
 - SBOM scan is fast and reproducible
 - Works well for rescans when new advisories appear
@@ -741,14 +756,36 @@ What to monitor (automatically):
 
 ## Step 5: Enable automated updates monitoring
 
-Use Dependabot (or equivalent) to:
+Use Renovate (or equivalent) to:
 
 - watch dependency and container updates
 - raise PRs automatically
 - trigger CI rebuild / rescan workflows
 
-```yaml
+---
 
+## Example: setting up base updates monitoring with Renovate
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "enabledManagers": ["dockerfile", "docker-compose"],
+  "schedule": ["every weekend"],
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["minor", "patch", "digest"]
+    }
+  ]
+}
 ```
 
 ---
@@ -764,18 +801,15 @@ When the base image updates, every dependent service should automatically:
 - Push by digest
 - Roll out through controlled deployment
 
----
-
-## Safe rollout strategy
-
-Rollout by workload criticality/exposure:
-
-- High-risk services → progressive delivery (canary / staged rollout)
-- Lower-risk services → standard rolling update
-- Any regression → automatic rollback
 
 ---
-layout: cover
+layout: image
+image: /good_room.jpeg
+---
+
+---
+layout: image
+image: /good_room.jpeg
 ---
 
 ## Quick summary?
