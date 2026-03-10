@@ -359,7 +359,7 @@ layout: cover
 
 ## Step 2: Shrink privileges
 
-🤩 Most hardened images run as non-root by default.<br><br>
+🤩  Most hardened images run as non-root by default.<br><br>
 If not, do it manually:
 
 ```dockerfile
