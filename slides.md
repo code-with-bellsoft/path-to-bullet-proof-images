@@ -749,7 +749,6 @@ What to monitor (automatically):
 
 - Base image updates (container/Dockerfile)
 - Application dependencies (Maven/Gradle)
-- Security advisories (especially actively exploited / high-impact)
 
 ---
 
