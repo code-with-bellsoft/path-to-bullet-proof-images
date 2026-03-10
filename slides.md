@@ -29,18 +29,17 @@ image: "/cat.jpg"
 👾 CyberJAR Channel co-host (@cbrjar)
 
 ---
+layout: image-right
+image: "/members.png"
+---
 
 ## BellSoft
 
 <br/>
 
-Member of:
-
-- JCP Executive Committee
-- OpenJDK Vulnerability Group
-- GraalVM Advisory Board
-- Linux Foundation
-- Cloud Native Computing Foundation
+- Java and Linux experts with 15+ years of experience
+- Members of various boards/committees
+- Author of Alpine Linux Port
 
 ---
 
@@ -85,25 +84,34 @@ image: /room.png
 
 ## Let's assess the situation first. <br> How bad is it? <br><br> <v-click>If we translate picture into code...</v-click>
 
+---
+
+## NeuroWatch Demo
+<br/>
+
+- Petclinic on steroids
+- Spring Boot 4
+- Java 25
+- Spring Security
+- Spring AI
+- MongoDB
+- Vaadin
 
 ---
 
 ## Initial Dockerfile
+
 
 ```dockerfile {none|1|4|6|8,9,10}{maxHeight:'250px'}
 FROM eclipse-temurin:25-jdk as builder
 WORKDIR /app
 COPY . /app/neurowatch
 RUN cd neurowatch && ./mvnw -Pproduction package
-
-FROM eclipse-temurin:25-jre
-WORKDIR /app
-COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/neurowatch/target/*.jar"]
 ```
 
-Final image: 441MB
+Final image: 1GB
 
 <v-click>Looks innocent enough, until...</v-click>
 
@@ -115,20 +123,37 @@ Final image: 441MB
 osv-scanner scan image neurowatch:latest
 ```
 
-```bash {all|2|all}
+```bash {all|2,3|all}{maxHeight:'300px'}
 
-Total 13 packages affected by 18 known vulnerabilities (0 Critical, 4 High, 11 Medium, 3 Low, 0 Unknown) from 1 ecosystem.
+Total 19 packages affected by 46 known vulnerabilities (0 Critical, 12 High, 16 Medium, 8 Low, 10 Unknown) from 2 ecosystems.
+5 vulnerabilities can be fixed.
+
+
+Maven
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Source:artifact:/app/app.jar                                                                                                │
+├─────────────────────────────────────────┬───────────────────┬───────────────┬────────────┬──────────────────┬───────────────┤
+│ PACKAGE                                 │ INSTALLED VERSION │ FIX AVAILABLE │ VULN COUNT │ INTRODUCED LAYER │ IN BASE IMAGE │
+├─────────────────────────────────────────┼───────────────────┼───────────────┼────────────┼──────────────────┼───────────────┤
+│ com.fasterxml.jackson.core:jackson-core │ 2.20.2            │ Fix Available │          1 │ # 17 Layer       │ --            │
+│ org.yaml:snakeyaml                      │ 1.33              │ Fix Available │          1 │ # 17 Layer       │ --            │
+│ tools.jackson.core:jackson-core         │ 3.0.3             │ Fix Available │          2 │ # 17 Layer       │ --            │
+╰─────────────────────────────────────────┴───────────────────┴───────────────┴────────────┴──────────────────┴───────────────╯
+Ubuntu:24.04
 ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ Source:os:/var/lib/dpkg/status                                                                                                          │
 ├────────────────┬─────────────────────────┬──────────────────┬────────────┬─────────────────────────┬──────────────────┬─────────────────┤
 │ SOURCE PACKAGE │ INSTALLED VERSION       │ FIX AVAILABLE    │ VULN COUNT │ BINARY PACKAGES (COUNT) │ INTRODUCED LAYER │ IN BASE IMAGE   │
 ├────────────────┼─────────────────────────┼──────────────────┼────────────┼─────────────────────────┼──────────────────┼─────────────────┤
+│ binutils       │ 2.42-4ubuntu2.8         │ No fix available │         22 │ binutils... (8)         │ # 9 Layer        │ eclipse-temurin │
 │ coreutils      │ 9.4-3ubuntu6.1          │ No fix available │          2 │ coreutils               │ # 4 Layer        │ ubuntu          │
+│ dpkg           │ 1.22.6ubuntu6.5         │ No fix available │          1 │ dpkg                    │ # 4 Layer        │ ubuntu          │
 │ expat          │ 2.6.1-2ubuntu0.4        │ No fix available │          2 │ libexpat1               │ # 9 Layer        │ eclipse-temurin │
-│ glibc          │ 2.39-0ubuntu8.7         │ No fix available │          1 │ libc-bin, libc6... (3)  │ # 4 Layer        │ ubuntu          │
+│ freetype       │ 2.13.2+dfsg-1build3     │ No fix available │          1 │ libfreetype6            │ # 9 Layer        │ eclipse-temurin │
 │ gnupg2         │ 2.4.4-2ubuntu17.4       │ No fix available │          2 │ gpgv                    │ # 4 Layer        │ ubuntu          │
 │ gnutls28       │ 3.8.3-1.1ubuntu3.4      │ Fix Available    │          1 │ libgnutls30t64          │ # 4 Layer        │ ubuntu          │
 │ libgcrypt20    │ 1.10.3-2build1          │ No fix available │          1 │ libgcrypt20             │ # 4 Layer        │ ubuntu          │
+│ libpng1.6      │ 1.6.43-5ubuntu0.5       │ No fix available │          1 │ libpng16-16t64          │ # 9 Layer        │ eclipse-temurin │
 │ lz4            │ 1.9.4-1build1.1         │ No fix available │          1 │ liblz4-1                │ # 4 Layer        │ ubuntu          │
 │ ncurses        │ 6.4+20240113-1ubuntu2   │ No fix available │          1 │ libncursesw6... (4)     │ # 4 Layer        │ ubuntu          │
 │ openssl        │ 3.0.13-0ubuntu3.7       │ No fix available │          2 │ libssl3t64, openssl     │ # 4 Layer        │ ubuntu          │
@@ -137,6 +162,7 @@ Total 13 packages affected by 18 known vulnerabilities (0 Critical, 4 High, 11 M
 │ tar            │ 1.35+dfsg-3build1       │ No fix available │          1 │ tar                     │ # 4 Layer        │ ubuntu          │
 │ zlib           │ 1:1.3.dfsg-3.1ubuntu2.1 │ No fix available │          1 │ zlib1g                  │ # 4 Layer        │ ubuntu          │
 ╰────────────────┴─────────────────────────┴──────────────────┴────────────┴─────────────────────────┴──────────────────┴─────────────────╯
+
 
 ```
 
@@ -155,9 +181,9 @@ Report Summary
 ┌─────────────────────────────────────────────┬────────┬─────────────────┬─────────┐
 │                   Target                    │  Type  │ Vulnerabilities │ Secrets │
 ├─────────────────────────────────────────────┼────────┼─────────────────┼─────────┤
-│ neurowatch-neurowatch:latest (ubuntu 24.04) │ ubuntu │       14        │    -    │
+│ neurowatch-neurowatch:latest (ubuntu 24.04) │ ubuntu │       38        │    -    │
 ├─────────────────────────────────────────────┼────────┼─────────────────┼─────────┤
-│ app/app.jar                                 │  jar   │        1        │    -    │
+│ app/app.jar                                 │  jar   │        4        │    -    │
 └─────────────────────────────────────────────┴────────┴─────────────────┴─────────┘
 
 ```
@@ -177,7 +203,7 @@ Report Summary
 ┌────────────────────────────┬────────┬─────────────────┬─────────┐
 │           Target           │  Type  │ Vulnerabilities │ Secrets │
 ├────────────────────────────┼────────┼─────────────────┼─────────┤
-│ openjdk:25-ea (oracle 9.6) │ oracle │       69        │    -    │
+│ openjdk:25-ea (oracle 9.6) │ oracle │       72        │    -    │
 └────────────────────────────┴────────┴─────────────────┴─────────┘
 
 ```
@@ -193,14 +219,21 @@ Report Summary
 ┌────────────────────────────┬────────┬─────────────────┬─────────┐
 │           Target           │  Type  │ Vulnerabilities │ Secrets │
 ├────────────────────────────┼────────┼─────────────────┼─────────┤
-│ openjdk:21-ea (oracle 8.8) │ oracle │       131       │    -    │
+│ openjdk:21-ea (oracle 8.8) │ oracle │       132       │    -    │
 └────────────────────────────┴────────┴─────────────────┴─────────┘
 
 ```
 
 ---
+layout: image
+image: /cve-count.svg
+---
+
+
+---
 
 ## Apart from that...
+<br/>
 
 - package manager,
 - runs as root,
@@ -209,6 +242,16 @@ Report Summary
 - CVE noise,
 - No provenance,
 - irregular updates.
+
+
+---
+
+## Why do we care?
+<br/>
+
+- Some CVEs are real bombs (Remote Code Execution, RCE)
+- You may have RCE vuln and not even know it!
+- Failed audit = legal consequences
 
 ---
 
@@ -586,15 +629,18 @@ osv-scanner -L target/app-sbom.cdx.json --output base-scan-results.json
 ## Scan results for our demo
 
 ```bash
-Total 1 package affected by 1 known vulnerability (0 Critical, 1 High, 0 Medium, 0 Low, 0 Unknown) from 1 ecosystem.
-1 vulnerability can be fixed.
+Total 3 packages affected by 4 known vulnerabilities (0 Critical, 4 High, 0 Medium, 0 Low, 0 Unknown) from 1 ecosystem.
+4 vulnerabilities can be fixed.
 
 
-+-------------------------------------+------+-----------+--------------------+---------+---------------+--------------------------+
-| OSV URL                             | CVSS | ECOSYSTEM | PACKAGE            | VERSION | FIXED VERSION | SOURCE                   |
-+-------------------------------------+------+-----------+--------------------+---------+---------------+--------------------------+
-| https://osv.dev/GHSA-mjmj-j48q-9wg2 | 8.3  | Maven     | org.yaml:snakeyaml | 1.33    | 2.0           | target/app-sbom.cdx.json |
-+-------------------------------------+------+-----------+--------------------+---------+---------------+--------------------------+
++-------------------------------------+------+-----------+-----------------------------------------+---------+---------------+--------------------------+
+| OSV URL                             | CVSS | ECOSYSTEM | PACKAGE                                 | VERSION | FIXED VERSION | SOURCE                   |
++-------------------------------------+------+-----------+-----------------------------------------+---------+---------------+--------------------------+
+| https://osv.dev/GHSA-72hv-8253-57qq | 8.7  | Maven     | com.fasterxml.jackson.core:jackson-core | 2.20.2  | 2.21.1        | target/app-sbom.cdx.json |
+| https://osv.dev/GHSA-mjmj-j48q-9wg2 | 8.3  | Maven     | org.yaml:snakeyaml                      | 1.33    | 2.0           | target/app-sbom.cdx.json |
+| https://osv.dev/GHSA-6v53-7c9g-w56r | 8.7  | Maven     | tools.jackson.core:jackson-core         | 3.0.3   | 3.1.0         | target/app-sbom.cdx.json |
+| https://osv.dev/GHSA-72hv-8253-57qq | 8.7  | Maven     | tools.jackson.core:jackson-core         | 3.0.3   | 3.1.0         | target/app-sbom.cdx.json |
++-------------------------------------+------+-----------+-----------------------------------------+---------+---------------+--------------------------+
 
 ```
 
@@ -760,6 +806,7 @@ Use Renovate (or equivalent) to:
 - raise PRs automatically
 - trigger CI rebuild / rescan workflows
 
+
 ---
 
 ## Example: setting up base updates monitoring with Renovate
@@ -788,9 +835,24 @@ Use Renovate (or equivalent) to:
 
 ---
 
+## Use Renovate and Co. Sensibly
+<br/>
+
+These tools DO NOT monitor CVEs. They just look for updates
+- Do not accept PRs blindly
+- Scan and test after PR: got better or worse?
+- Accept the PR if necessary
+
+<br/>
+
+<v-click>The robot gathers data - humans make a decision</v-click>
+ 
+
+---
+
 ## Safe rollout strategy
 
-When the base image updates, every dependent service should automatically:
+When updating, every dependent service should automatically:
 
 - Rebuild application image on new base
 - Regenerate SBOM + provenance
@@ -816,13 +878,18 @@ image: /good_room.jpeg
 
 ## Building the foundation for vulnerability management is not that hard
 
-Four first important steps
+Five first important steps
 
 - Migrate to a hardened base: start safe
+- Shrink privileges, run as non-root: minimize blast radius
 - Generate an SBOM: become aware
 - Scan SBOMs: stay aware
 - Set up updates monitoring: stay safe
 
+
+---
+layout: image-right
+image: "/qr-cyber.svg"
 ---
 
 ## Thank you for your attention!
