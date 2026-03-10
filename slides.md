@@ -222,7 +222,7 @@ No chasing after every CVE<br>
 
 ---
 
-## Ok, time is running out, what's the plan?
+## Time is running out, what's the plan?
 
 Actions:<br><br>
 Harden the base<br>
