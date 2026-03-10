@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "slidev build",
+    "build-gha": "slidev build --base /45-minutes-to-bullet-proof-java-containers/",
     "dev": "slidev --open",
     "export": "slidev export"
   },
