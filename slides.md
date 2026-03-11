@@ -1231,5 +1231,4 @@ image: "/qr-cyber.svg"
 - BlueSky: @edelveis.dev
 - X: cat_edelveis
 - LinkedIn: cat-edelveis
-- YouTube: @cbrjar
 - bell-sw.com
