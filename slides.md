@@ -39,7 +39,7 @@ image: "/members.png"
 
 - Java and Linux experts with 15+ years of experience
 - Members of various boards/committees
-- Author of Alpine Linux Port
+- Alpine Linux support in OpenJDK
 
 ---
 
@@ -49,7 +49,7 @@ image: "/members.png"
 
 Products:
 
-- Liberica JDK
+- Liberica JDK (officially recommended by Spring)
 - Liberica Native Image Kit
 - Alpaquita Linux
 - BellSoft Hardened Images
@@ -97,12 +97,14 @@ image: /room.png
 - MongoDB
 - Vaadin
 
+https://github.com/des-felins/neurowatch
+
 ---
 
 ## Initial Dockerfile
 
 
-```dockerfile {none|1|4|6|8,9,10}{maxHeight:'250px'}
+```dockerfile {none|1|4|6|8,9,10}
 FROM eclipse-temurin:25-jdk as builder
 WORKDIR /app
 COPY . /app/neurowatch
@@ -268,11 +270,11 @@ No chasing after every CVE<br>
 <br/>
 
 Actions:<br><br>
-Shrink privileges<br>
-Scan<br>
-Classify risk<br>
-Pick the right base<br>
-Generate provenance<br>
+1. Shrink privileges<br>
+2. Scan<br>
+3. Classify risk<br>
+4. Pick the right base<br>
+5. Generate provenance<br>
 
 ---
 layout: cover
@@ -386,7 +388,8 @@ RUN cd neurowatch && ./mvnw -Pproduction clean package
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
-COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
+USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
@@ -422,7 +425,8 @@ RUN cd neurowatch && ./mvnw -Pproduction clean package
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
-COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
+USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
@@ -436,7 +440,8 @@ RUN cd neurowatch && ./mvnw -Pproduction clean package
 
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
-COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
+USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
@@ -775,7 +780,7 @@ layout: two-cols-header
   <div class="arrow">➡️</div>
   <div class="hb">Minimized attack surface</div>
 
-  <div class="hb">Focus on continuous CVE patching</div>
+  <div class="hb">Focus on CONSTANT CVE patching</div>
   <div class="arrow">➡️</div>
   <div class="hb">The image STAYS safe</div>
 </div>
@@ -890,20 +895,20 @@ image: /alpaquita.jpg
 
 ## New Dockerfile
 
-```dockerfile {none|1,7}
+```dockerfile {all|1,7}
 FROM bellsoft/hardened-liberica-runtime-container:jdk-25-glibc as builder
 
 WORKDIR /app
-ADD my-app /app/my-app
-RUN cd my-app && ./mvnw -Pproduction package
+COPY . /app/neurowatch
+RUN cd neurowatch && ./mvnw -Pproduction clean package
 
 FROM bellsoft/hardened-liberica-runtime-container:jre-25-glibc
 
 WORKDIR /app
-COPY --from=builder /app/my-app/target/*.jar app.jar
-
+COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
+USER 10001:10001
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
 
 <v-click>Image size: 219MB</v-click>
