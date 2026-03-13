@@ -388,8 +388,13 @@ RUN cd neurowatch && ./mvnw -Pproduction clean package
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
-COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
-USER 10001:10001
+RUN set -o errexit -o nounset \
+    && echo "Adding temurin user and group" \
+    && addgroup -Sg 1000 temurin \
+    && adduser -SG temurin -u 1000 temurin
+    
+COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+USER temurin
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
@@ -425,8 +430,13 @@ RUN cd neurowatch && ./mvnw -Pproduction clean package
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
-COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
-USER 10001:10001
+RUN set -o errexit -o nounset \
+    && echo "Adding temurin user and group" \
+    && addgroup -Sg 1000 temurin \
+    && adduser -SG temurin -u 1000 temurin
+    
+COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+USER temurin
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
@@ -440,8 +450,13 @@ RUN cd neurowatch && ./mvnw -Pproduction clean package
 
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
-COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
-USER 10001:10001
+RUN set -o errexit -o nounset \
+    && echo "Adding temurin user and group" \
+    && addgroup -Sg 1000 temurin \
+    && adduser -SG temurin -u 1000 temurin
+    
+COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+USER temurin
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
@@ -905,8 +920,13 @@ RUN cd neurowatch && ./mvnw -Pproduction clean package
 FROM bellsoft/hardened-liberica-runtime-container:jre-25-glibc
 
 WORKDIR /app
-COPY --from=builder --chown=10001:10001 /app/neurowatch/target/neurowatch-*.jar app.jar
-USER 10001:10001
+RUN set -o errexit -o nounset \
+    && echo "Adding liberica user and group" \
+    && addgroup -Sg 1000 liberica \
+    && adduser -SG liberica -u 1000 liberica \
+    
+COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+USER liberica
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
