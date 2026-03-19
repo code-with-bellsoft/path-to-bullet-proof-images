@@ -1020,10 +1020,11 @@ $ cosign verify \
 Verify attestation and get the SBOM:
 
 ```bash
-$ cosign verify-attestation \
-    --key cosign.pub \
+$ IMG='docker.io/bellsoft/hardened-base:glibc'
+cosign verify-attestation \
+    --key ~/keys/cosign-bellsoft.pub \
     --type cyclonedx \
-    $IMG_TTL | jq -r '.payload' | base64 -d | jq -r '.predicate'
+    $IMG | jq -r '.payload' | base64 -d | jq '.predicate'
 ```
 
 ---
