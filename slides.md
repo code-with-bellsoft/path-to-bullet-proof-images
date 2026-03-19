@@ -169,27 +169,6 @@ Ubuntu:24.04
 
 ---
 
-## ...Until we set the scanners loose
-
-```bash
-trivy image neurowatch:latest
-```
-
-```bash
-
-Report Summary
-┌─────────────────────────────────────────────┬────────┬─────────────────┬─────────┐
-│                   Target                    │  Type  │ Vulnerabilities │ Secrets │
-├─────────────────────────────────────────────┼────────┼─────────────────┼─────────┤
-│ neurowatch-neurowatch:latest (ubuntu 24.04) │ ubuntu │       38        │    -    │
-├─────────────────────────────────────────────┼────────┼─────────────────┼─────────┤
-│ app/app.jar                                 │  jar   │        4        │    -    │
-└─────────────────────────────────────────────┴────────┴─────────────────┴─────────┘
-
-```
-
----
-
 ## Could be worse...
 
 ```bash
@@ -380,7 +359,7 @@ EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/neurowatch/target/*.jar"]
 ```
 
-```docker
+```dockerfile
 FROM eclipse-temurin:25-jdk as builder
 WORKDIR /app
 COPY . /app/neurowatch
@@ -399,6 +378,28 @@ EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
 ````
+
+---
+
+```dockerfile {none|1,6|8-11|13,14}
+FROM eclipse-temurin:25-jdk as builder
+WORKDIR /app
+COPY . /app/neurowatch
+RUN cd neurowatch && ./mvnw -Pproduction clean package
+
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+RUN set -o errexit -o nounset \
+    && echo "Adding temurin user and group" \
+    && addgroup -Sg 1000 temurin \
+    && adduser -SG temurin -u 1000 temurin
+    
+COPY --from=builder /app/neurowatch/target/neurowatch-*.jar app.jar
+USER temurin
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/app/app.jar"]
+```
+
 
 
 ---
@@ -441,7 +442,7 @@ EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
 ```
 
-```docker
+```dockerfile
 FROM eclipse-temurin:25-jdk-alpine as builder
 RUN apk add --no-cache nodejs npm
 WORKDIR /app
@@ -673,7 +674,7 @@ layout: two-cols-header
 ## We pulled the fresh base, let's scan it
 <br/>
 
-```bash {all|1,2|all}{maxHeight:'350px'}
+```bash {all|1,2}{maxHeight:'350px'}
 eclipse-temurin:25-jre-alpine (alpine 3.23.3)
 Total: 3 (UNKNOWN: 0, LOW: 0, MEDIUM: 1, HIGH: 1, CRITICAL: 1)
 ┌─────────┬────────────────┬──────────┬────────┬───────────────────┬───────────────┬─────────────────────────────────────────────────────────────┐
@@ -980,10 +981,6 @@ Provenance = verifiable supply chain evidence for:
 
 > Who and what built this image?
 
----
-layout: image
-image: /pipeline.svg
----
 
 ---
 
@@ -1091,19 +1088,10 @@ Can add a plugin
 </plugin>
 ```
 
----
-
-## Step 3.3: Store evidence where you can retrieve it fast
-
-Store attestations and SBOMs in:
-
-- OCI registry (attached to image)
-- and/or artifact store for indexing/search
-
 
 ---
 
-## Step 3.4: Scan SBOMs
+## Step 3.3: Scan SBOMs
 <br/>
 
 We have SBOMs = we scan what we actually built<br>
@@ -1114,7 +1102,7 @@ We have SBOMs = we scan what we actually built<br>
 
 ---
 
-## Step 3.4: Scan SBOMs
+## Step 3.3: Scan SBOMs
 
 Scan application SBOM:
 
