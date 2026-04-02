@@ -14,52 +14,22 @@ shiki: { theme: "nord" }
 <img src="/bellsoft.png" width="200px" class="absolute right-10px bottom-5px"/>
 
 ---
-layout: image-right
-image: "/cat.jpg"
----
 
-## 'whoami'
+# Mission Briefing: Who Sent Me In?
 
-🥑 Developer Advocate at BellSoft
-
-😍 Java developer
-
-👩‍💻 Tech writer
-
-👾 CyberJAR Channel co-host (@cbrjar)
+- **Liberica JDK** → trusted runtime for Spring workloads
+- **Alpaquita Linux** → operating in tight, hostile environments
+- **BellSoft Hardened Images** → body armor
 
 ---
-layout: image-right
-image: "/members.png"
+layout: image
+image: /room.png
 ---
 
-## BellSoft
-
-<br/>
-
-- Java and Linux experts with 15+ years of experience
-- Members of various boards/committees
-- Alpine Linux support in OpenJDK
-
 ---
-
-## BellSoft
-
-<br/>
-
-Products:
-
-- Liberica JDK (officially recommended by Spring)
-- Liberica Native Image Kit
-- Alpaquita Linux
-- BellSoft Hardened Images
-
+layout: image
+image: /kaboom.png
 ---
-
-<SlidevVideo v-click autoplay controls>
-  <source src="/room_video.mp4" type="video/mp4" />
-  <autoplay>true</autoplay>
-</SlidevVideo>
 
 ---
 layout: image
@@ -216,50 +186,124 @@ image: /cve-count.svg
 - runs as root,
 - random base,
 - tons of packages,
-- CVE noise,
 - No provenance,
 - irregular updates.
 
 
 ---
 
-## Why do we care?
+## Bombs Explode in 20% of Cases
 <br/>
 
-- Some CVEs are real bombs (Remote Code Execution, RCE)
-- You may have RCE vuln and not even know it!
-- Failed audit = legal consequences
+<div class="grid grid-cols-2 gap-10 pt-6">
+<div>
+
+## Vulnerability
+### Remote Code Execution
+Silent risk
+
+</div>
+<div>
+
+## Impact
+### Data breach
+Audit failure<br/>
+Lawsuits<br/>
+Lost money + reputation
+
+</div>
+</div>
+
+<div class="pt-10 text-4xl font-bold">
+$4.4M average breach cost
+</div>
+
 
 ---
-
-## Time is running out, what's the plan?
-<br/>
-
-Mission objective:<br><br>
-Low-noise, locked-down Java container on a hardened base with zero unmanaged risk
-
-Rules:<br><br>
-No chasing after every CVE<br>
-- Not all of them are exploitable in your case
-- Constant re-testing -> too heavy load on the system
-
+layout: default
+class: px-12 py-10
 ---
 
-## Time is running out, what's the plan?
-<br/>
+<div class="h-full flex flex-col justify-between border-2 border-stone-500 rounded-2xl bg-[#111] text-stone-100 shadow-2xl overflow-hidden">
 
-Actions:<br><br>
-1. Shrink privileges<br>
-2. Scan<br>
-3. Classify risk<br>
-4. Pick the right base<br>
-5. Generate provenance<br>
+  <!-- Header -->
+  <div class="flex items-center justify-between px-8 py-4 border-b border-stone-600 uppercase tracking-[0.25em] text-sm text-stone-400">
+    <div></div>
+    <div>Operation: Bullet-Proof Java Container</div>
+  </div>
+
+  <!-- Main briefing card -->
+  <div class="flex-1 p-10 flex flex-col justify-center">
+
+
+<div class="text-xs uppercase tracking-[0.3em] text-red-400 mb-4">
+  Objective
+</div>
+
+<div class="space-y-3 text-3xl font-bold leading-tight mb-10">
+  <div>low-noise image</div>
+  <div>zero unmanaged risk</div>
+</div>
+
+<div class="text-xs uppercase tracking-[0.3em] text-amber-300 mb-4">
+  Rules of Engagement
+</div>
+
+<div class="space-y-3 text-3xl font-bold leading-tight">
+  <div>fix real exposure</div>
+  <div>don't become your own vendor</div>
+</div>
+
+  </div>
+
+  <!-- Bottom strip -->
+  <div class="grid grid-cols-[1fr_auto] items-center px-8 py-2 border-t border-stone-600 bg-[#181818]">
+    <div class="text-sm uppercase tracking-[0.25em] text-stone-400">
+      Time remaining
+    </div>
+    <div class="text-5xl font-bold text-red-400 tracking-widest">
+      40:00
+    </div>
+  </div>
+</div>
+
+
+---
+layout: default
+class: px-12 py-10
+---
+
+<div class="h-full flex flex-col border-2 border-stone-500 rounded-2xl bg-[#111] text-stone-100 shadow-2xl overflow-hidden">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between px-8 py-4 border-b border-stone-600 uppercase tracking-[0.25em] text-sm text-stone-400">
+    <div>Field Procedure</div>
+    <div>Operation: Bullet-Proof Java Container</div>
+  </div>
+
+  <!-- Main panel -->
+  <div class="flex-1 px-10 py-8 flex flex-col justify-center">
+    <div class="text-xs uppercase tracking-[0.3em] text-red-400 mb-6">
+      Actions
+    </div>
+
+<div class="space-y-5 text-3xl font-bold leading-tight">
+  <div class="flex gap-4"><div class="w-10 text-stone-500">01</div><div>Limit privileges</div></div>
+  <div class="flex gap-4"><div class="w-10 text-stone-500">02</div><div>Scan</div></div>
+  <div class="flex gap-4"><div class="w-10 text-stone-500">03</div><div>Classify risk</div></div>
+  <div class="flex gap-4"><div class="w-10 text-stone-500">04</div><div>Choose a base</div></div>
+  <div class="flex gap-4"><div class="w-10 text-stone-500">05</div><div>Generate provenance</div></div>
+</div>
+
+</div>
+</div>
+
 
 ---
 layout: cover
 ---
 
-## Step 1: Shrink privileges
+## Step 1: Limit privileges
 
 ### Goal: Reduce blast radius in case of attack.
 
